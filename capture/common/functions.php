@@ -308,6 +308,26 @@ function create_admin() {
     ) ENGINE = MyISAM DEFAULT CHARSET = utf8mb4";
     $create = $dbh->prepare($sql);
     $create->execute();
+    
+    /**
+     * Add table search queue table to record search status
+     * 
+     * @since 2015-05-20
+     */
+    $sql = "CREATE TABLE IF NOT EXISTS `tcat_search_queues` (
+    `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
+    `querybin_id` INT(11) unsigned NOT NULL,
+    `description` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `origin_phrase` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `createtime` DATETIME NULL,
+    `updatetime` DATETIME NULL,
+    `savedtime` DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `querybin_id` (`querybin_id`),
+    KEY `updatetime`(`updatetime`)
+    ) ENGINE = MyISAM DEFAULT CHARSET = utf8";
+    $create = $dbh->prepare($sql);
+    $create->execute();
 
     // 03/03/2015 Add comments column [fast auto-upgrade - reminder to remove]
     $query = "SHOW COLUMNS FROM tcat_query_bins";
