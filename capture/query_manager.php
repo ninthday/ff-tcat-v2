@@ -137,6 +137,44 @@ function create_new_bin($params) {
             $insert_connect = $dbh->prepare($sql);
             $insert_connect->execute();
         }
+    } elseif ($type == "search") {
+        /**
+         * Add new search queue
+         * @author ninthday <bee.me@ninthday.info>
+         * @since 2015-05-26
+         */
+        $origin_parses = $params["newbin_phrases"];
+
+        $sql = "INSERT INTO `tcat_search_queues`(`querybin_id`, `origin_phrase`, `username`, `createtime`, `updatetime`) VALUES (:querybin_id, :origin_parses, :username, :createtime, NULL)";
+        $insert_search = $dbh->prepare($sql);
+        $insert_search->bindParam(":querybin_id", $lastbinid, PDO::PARAM_INT);
+        $insert_search->bindParam(":origin_parses", $origin_parses, PDO::PARAM_STR);
+        $insert_search->bindParam(":username", $_SERVER['PHP_AUTH_USER'], PDO::PARAM_STR);
+        $insert_search->bindParam(":createtime", $now, PDO::PARAM_STR);
+        $insert_search->execute();
+
+        $phrases = explode("OR", $params["newbin_phrases"]);
+        $phrases = array_trim_and_unique($phrases);
+        foreach ($phrases as $phrase) {
+            $phrase = str_replace("\"", "'", $phrase);
+            $sql = "SELECT distinct(id) FROM tcat_query_phrases WHERE phrase = :phrase";
+            $check_phrase = $dbh->prepare($sql);
+            $check_phrase->bindParam(":phrase", $phrase, PDO::PARAM_STR);
+            $check_phrase->execute();
+            if ($check_phrase->rowCount() > 0) {
+                $results = $check_phrase->fetch();
+                $inid = $results['id'];
+            } else {
+                $sql = "INSERT INTO tcat_query_phrases (phrase) VALUES (:phrase)";
+                $insert_phrase = $dbh->prepare($sql);
+                $insert_phrase->bindParam(":phrase", $phrase, PDO::PARAM_STR);
+                $insert_phrase->execute();
+                $inid = $dbh->lastInsertId();
+            }
+            $sql = "INSERT INTO tcat_query_bins_phrases (phrase_id,querybin_id,starttime,endtime) VALUES ('" . $inid . "','" . $lastbinid . "','$now','0000-00-00 00:00:00')";
+            $insert_connect = $dbh->prepare($sql);
+            $insert_connect->execute();
+        }
     }
 
     if (web_reload_config_role($type)) {

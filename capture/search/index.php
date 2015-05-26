@@ -4,6 +4,9 @@ To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
+<?php
+include_once '../../config.php';
+?>
 <html>
     <head>
         <meta charset="UTF-8">
@@ -97,12 +100,12 @@ and open the template in the editor.
                         <div class="panel-heading">Search Bins</div>
                         <div class="panel-body">
                             <div class="col-md-3">
-                                <button type="button" class="btn btn-primary"><i class="fa fa-search-plus"></i> New Search Bin</button>
+                                <button type="button" class="btn btn-primary" name="newbin"><i class="fa fa-search-plus"></i> New Search Bin</button>
                             </div>
                             <div class="col-md-9">
-                                <div id="new-content" class="hidden">
+                                <div id="new-content" class="collapse">
                                     <form onsubmit="sendNewForm();
-                                        return false;">
+                                            return false;">
                                         <div class="form-group">
                                             <label for="newbin_name" class="control-label">Query Bin</label>
                                             <input type="text" class="form-control" id="newbin_name" placeholder="Bin name">
@@ -110,16 +113,15 @@ and open the template in the editor.
                                         </div>
                                         <div class="form-group">
                                             <label for="inputPhrase" class="control-label">Phrase to search</label>
-
                                             <input type="text" class="form-control" id="inputPhrase" placeholder="Phrases">
                                             <p class="help-block"><i class="fa fa-exclamation-triangle"></i> 以 <kbd>OR</kbd> 區別關鍵字，例如:台灣 OR 中華民國 OR Taiwan OR "Republic of China"</p>
                                         </div>
                                         <div class="form-group">
-                                            <label for="inputPhrase" class="control-label">Description</label>
-                                            <input type="text" class="form-control" id="inputDescription" placeholder="Description">
+                                            <label for="newbin_comments" class="control-label">Comment</label>
+                                            <textarea name="newbin_comments" class="form-control" rows="3" placeholder="Comment"></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <button type="submit" class="btn btn-warning">Create query bin</button>
+                                            <button type="submit" class="btn btn-warning">Create Search bin</button>
                                         </div>
                                     </form>
                                 </div>
@@ -172,44 +174,55 @@ and open the template in the editor.
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-                                    $(document).ready(function () {
-
-                                    });
-                                    function sendNewForm() {
-                                        var _bin = $("#newbin_name").val();
-                                        var _description = $("#inputDescription").val();
-                                        if (!validateBin(_bin))
-                                            return false;
-
-                                        var _phrases = $("#inputPhrase").val();
-                                        var _check = window.confirm("You are about to create a new search query bin. Are you sure?");
-                                        if (_check == true) {
-                                            var _params = {action: "newbin", type: "search", newbin_phrases: _phrases, newbin_name: _bin, description: _description, active: $("#make_active").val()};
-                                            $.ajax({
-                                                dataType: "json",
-                                                url: "../query_manager.php",
-                                                type: 'POST',
-                                                data: _params
-                                            }).done(function (_data) {
-                                                alert(_data["msg"]);
-                                                location.reload();
+                                        $(document).ready(function () {
+                                            $("button[name='newbin']").click(function () {
+                                                console.log('Click!');
+                                                $("#new-content").slideDown('slow');
                                             });
+                                        });
+                                        function sendNewForm() {
+                                            var _bin = $("#newbin_name").val();
+                                            var _comments = $("textarea[name=newbin_comments]").val();
+                                            if (!validateBin(_bin))
+                                                return false;
+                                            if (!validateComments(_comments))
+                                                return false;
+                                            var _phrases = $("#inputPhrase").val();
+                                            var _check = window.confirm("You are about to create a new search query bin. Are you sure?");
+                                            if (_check == true) {
+                                                var _params = {action: "newbin", type: "search", newbin_phrases: _phrases, newbin_name: _bin, newbin_comments: _comments, active: $("#make_active").val()};
+                                                $.ajax({
+                                                    dataType: "json",
+                                                    url: "../query_manager.php",
+                                                    type: 'POST',
+                                                    data: _params
+                                                }).done(function (_data) {
+                                                    alert(_data["msg"]);
+                                                    location.reload();
+                                                });
+                                            }
+                                            return false;
                                         }
-                                        return false;
-                                    }
 
-                                    function validateBin(binname) {
-                                        if (binname == null || binname.trim() == "") {
-                                            alert("You cannot use an empty bin name");
-                                            return false;
+                                        function validateBin(binname) {
+                                            if (binname == null || binname.trim() == "") {
+                                                alert("You cannot use an empty bin name");
+                                                return false;
+                                            }
+                                            var reg = /^[a-zA-Z0-9_]+$/;
+                                            if (!reg.test(binname.trim())) {
+                                                alert("bin names can only consist of alpha-numeric characters and underscores")
+                                                return false;
+                                            }
+                                            return true;
                                         }
-                                        var reg = /^[a-zA-Z0-9_]+$/;
-                                        if (!reg.test(binname.trim())) {
-                                            alert("bin names can only consist of alpha-numeric characters and underscores")
-                                            return false;
+                                        function validateComments(comments) {
+                                            if (comments.length > 2000) {
+                                                alert("Comments are too long (more than 2000 characters)");
+                                                return false;
+                                            }
+                                            return true;
                                         }
-                                        return true;
-                                    }
 
     </script>
 </html>

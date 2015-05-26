@@ -311,21 +311,20 @@ function create_admin() {
     
     /**
      * Add table search queue table to record search status
-     * 
+     * @author ninthday <bee.me@ninthday.info>
      * @since 2015-05-20
      */
     $sql = "CREATE TABLE IF NOT EXISTS `tcat_search_queues` (
     `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
     `querybin_id` INT(11) unsigned NOT NULL,
-    `description` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
     `origin_phrase` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `username` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci,
     `createtime` DATETIME NULL,
     `updatetime` DATETIME NULL,
-    `savedtime` DATETIME NULL,
     PRIMARY KEY (`id`),
     KEY `querybin_id` (`querybin_id`),
     KEY `updatetime`(`updatetime`)
-    ) ENGINE = MyISAM DEFAULT CHARSET = utf8";
+    ) ENGINE = MyISAM DEFAULT CHARSET = utf8mb4";
     $create = $dbh->prepare($sql);
     $create->execute();
 
