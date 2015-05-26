@@ -6,6 +6,8 @@ and open the template in the editor.
 -->
 <?php
 include_once '../../config.php';
+include_once BASE_FILE . '/capture/common/ff-functions.php';
+$search_bins = getSearchBins();
 ?>
 <html>
     <head>
@@ -15,7 +17,6 @@ include_once '../../config.php';
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <style>
             body {
-                min-height: 2000px;
                 padding-top: 70px;
             }
             .huge {
@@ -56,7 +57,9 @@ include_once '../../config.php';
                                     <i class="fa fa-tasks fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge">12</div>
+                                    <div class="huge">
+                                        <?php echo count($search_bins); ?>
+                                    </div>
                                     <div>In processes!</div>
                                 </div>
                             </div>
@@ -122,6 +125,7 @@ include_once '../../config.php';
                                         </div>
                                         <div class="form-group">
                                             <button type="submit" class="btn btn-warning">Create Search bin</button>
+                                            <button type="reset" class="btn btn-default" name="cancel-new">Cancel</button>
                                         </div>
                                     </form>
                                 </div>
@@ -130,18 +134,35 @@ include_once '../../config.php';
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Status</th>
-                                    <th>Bin Name</th>
-                                    <th>Phrases</th>
-                                    <th>Tweet amount</th>
-                                    <th>User name</th>
-                                    <th>Created Times</th>
-                                    <th>Last update</th>
-                                    <th>Description</th>
+                                    <th width="2%">#</th>
+                                    <th width="8%">Status</th>
+                                    <th width="8%">Bin Name</th>
+                                    <th width="30%">Phrases</th>
+                                    <th width="7%">Tweets</th>
+                                    <th width="5%">Creator</th>
+                                    <th width="10%" class="text-center">Create</th>
+                                    <th width="10%" class="text-center">Update</th>
+                                    <th width="20%">Comment</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php
+                                $i = 1;
+                                foreach ($search_bins as $bin) {
+                                    echo '<tr>';
+                                    echo '<td>' . $i . '.</td>';
+                                    echo '<td>sparkline</td>';
+                                    echo '<td>' . $bin->name . '</td>';
+                                    echo '<td>' . implode(', ', explode("OR", $bin->phrases)) . '</td>';
+                                    echo '<td align="center"> ' . number_format($bin->nrOfTweets) . '</td>';
+                                    echo '<td>' . $bin->username . '</td>';
+                                    echo '<td align="center"> ' . $bin->createtime . '</td>';
+                                    echo '<td align="center"> ' . $bin->updatetime . '</td>';
+                                    echo '<td> ' . $bin->comment . '</td>';
+                                    echo '</tr>';
+                                    $i++;
+                                }
+                                ?>
                                 <tr>
                                     <td>1.</td>
                                     <td>sparkline</td>
@@ -176,8 +197,12 @@ include_once '../../config.php';
     <script type="text/javascript">
                                         $(document).ready(function () {
                                             $("button[name='newbin']").click(function () {
-                                                console.log('Click!');
+                                                //console.log('Click!');
                                                 $("#new-content").slideDown('slow');
+                                            });
+                                            
+                                            $("button[name='cancel-new']").click(function(){
+                                                $("#new-content").slideUp('slow');
                                             });
                                         });
                                         function sendNewForm() {
@@ -199,6 +224,8 @@ include_once '../../config.php';
                                                 }).done(function (_data) {
                                                     alert(_data["msg"]);
                                                     location.reload();
+                                                    $("#new-content").slideUp('slow');
+                                                    clearInput();
                                                 });
                                             }
                                             return false;
@@ -222,6 +249,11 @@ include_once '../../config.php';
                                                 return false;
                                             }
                                             return true;
+                                        }
+                                        function clearInput(){
+                                            $("#newbin_name").val('');
+                                            $("#inputPhrase").val('');
+                                            $("textarea[name=newbin_comments]").val('');
                                         }
 
     </script>
