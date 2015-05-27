@@ -6,6 +6,12 @@ and open the template in the editor.
 -->
 <?php
 include_once '../../config.php';
+
+if (!isset($_SERVER['PHP_AUTH_USER'])) {
+    die("Please login first, thx!");
+}
+
+$username = $_SERVER['PHP_AUTH_USER'];
 include_once BASE_FILE . '/capture/common/ff-functions.php';
 $search_bins = getSearchBins();
 ?>
@@ -142,7 +148,8 @@ $search_bins = getSearchBins();
                                     <th width="5%">Creator</th>
                                     <th width="10%" class="text-center">Create</th>
                                     <th width="10%" class="text-center">Update</th>
-                                    <th width="20%">Comment</th>
+                                    <th width="15%">Comment</th>
+                                    <th width="5%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -159,6 +166,11 @@ $search_bins = getSearchBins();
                                     echo '<td align="center"> ' . $bin->createtime . '</td>';
                                     echo '<td align="center"> ' . $bin->updatetime . '</td>';
                                     echo '<td> ' . $bin->comment . '</td>';
+                                    echo '<td align="right">';
+                                    if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER){
+                                        echo '<button class="btn btn-default"><i class="fa fa-archive"></i></button>';
+                                    }
+                                    echo '</td>';
                                     echo '</tr>';
                                     $i++;
                                 }
@@ -172,7 +184,8 @@ $search_bins = getSearchBins();
                                     <td>User name</td>
                                     <td>Created Times</td>
                                     <td>Last update</td>
-                                    <td>Description</td> 
+                                    <td>Description</td>
+                                    <td align="right"><button class="btn btn-default" title="Archive this Bin!"><i class="fa fa-archive"></i></button></td> 
                                 </tr>
                                 <tr>
                                     <td>2.</td>
@@ -183,7 +196,8 @@ $search_bins = getSearchBins();
                                     <td>User name</td>
                                     <td>Created Times</td>
                                     <td>Last update</td>
-                                    <td>Description</td> 
+                                    <td>Description</td>
+                                    <td align="right"><button class="btn btn-default"><i class="fa fa-archive"></i></button></td> 
                                 </tr>
                             </tbody>
                         </table>
@@ -200,8 +214,8 @@ $search_bins = getSearchBins();
                                                 //console.log('Click!');
                                                 $("#new-content").slideDown('slow');
                                             });
-                                            
-                                            $("button[name='cancel-new']").click(function(){
+
+                                            $("button[name='cancel-new']").click(function () {
                                                 $("#new-content").slideUp('slow');
                                             });
                                         });
@@ -250,7 +264,7 @@ $search_bins = getSearchBins();
                                             }
                                             return true;
                                         }
-                                        function clearInput(){
+                                        function clearInput() {
                                             $("#newbin_name").val('');
                                             $("#inputPhrase").val('');
                                             $("textarea[name=newbin_comments]").val('');
