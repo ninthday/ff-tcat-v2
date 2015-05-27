@@ -47,3 +47,50 @@ function getSearchBins(){
     $dbh = false;
     return $querybins;
 }
+
+/**
+ * 查詢 Search NULL 優先，最小日子次之，傳回 querybin_id，keywords, binname
+ * @return array|bool
+ * @author ninthday <bee.me@ninthday.info>
+ * @since 2015-05-27
+ */
+function getBestSearchBin(){
+    $dbh = pdo_connect();
+    $sql = "SELECT `tcat_search_queues`.`querybin_id`, `tcat_search_queues`.`origin_phrase`, `tcat_query_bins`.`querybin` FROM `tcat_search_queues`
+            INNER JOIN `tcat_query_bins` ON `tcat_query_bins`.`id` = `tcat_search_queues`.`querybin_id`
+            ORDER BY `tcat_search_queues`.`updatetime` ASC";
+    $rec = $dbh->prepare($sql);
+    $searchbins = array();
+    if($rec->execute()){
+        $res = $rec->fetch();
+        $searchbins['querybin_id'] = $res['querybin_id'];
+        $searchbins['keywords'] = $res['origin_phrase'];
+        $searchbins['bin_name'] = $res['querybin'];
+    }else{
+        $dbh = false;
+        return false;
+    }
+    $dbh = false;
+    return $searchbins;
+}
+
+/**
+ * 更新 Search 資料表的時間
+ *
+ * @param int $querybin_id Bin編號
+ * @return bool 更新成功與否
+ * @author ninthday <bee.me@ninthday.info>
+ * @since 2015-05-27
+ */
+function updateSearchTime($querybin_id){
+    $bolRtn = false;
+    $dbh = pdo_connect();
+    $nowtime = date('Y-m-d H:i:s');
+    $sql = 'UPDATE `tcat_search_queues` SET `updatetime` = \'' . $nowtime . '\' WHERE `querybin_id` = ' . $querybin_id;
+    $rec = $dbh->prepare($sql);
+    if($rec->execute()){
+        $bolRtn = true;
+    }
+    $dbh = false;
+    return $bolRtn;
+}
