@@ -98,6 +98,7 @@ function updateSearchTime($querybin_id)
     $dbh = false;
     return $bolRtn;
 }
+
 /**
  * 計算指定 bin 的 tweets 數量
  * 
@@ -110,7 +111,7 @@ function countCaptureAmount($bin_name)
     $dbh = pdo_connect();
     $sql = 'SELECT COUNT(*) FROM `' . $bin_name . '_tweets`';
     $rec = $dbh->prepare($sql);
-    if($rec->execute()){
+    if ($rec->execute()) {
         $res = $rec->fetch(PDO::FETCH_NUM);
         $rtn = $res[0];
     } else {
@@ -129,13 +130,14 @@ function countCaptureAmount($bin_name)
  * @param int $diffamount 新增筆數
  * @return boolean
  */
-function saveActionLog($querybin_id, $diffamount){
+function saveActionLog($querybin_id, $diffamount)
+{
     $rtn = false;
     $dbh = pdo_connect();
     $nowtime = date('Y-m-d H:i:s');
     $sql = 'INSERT INTO `tcat_action_log`(`querybin_id`, `diffamount`, `actiontime`) '
             . 'VALUES (:querybin_id, :diffamount, :actiontime)';
-    
+
     $rec = $dbh->prepare($sql);
     $rec->bindParam(":querybin_id", $querybin_id, PDO::PARAM_INT);
     $rec->bindParam(":diffamount", $diffamount, PDO::PARAM_INT);
@@ -143,6 +145,29 @@ function saveActionLog($querybin_id, $diffamount){
     if ($rec->execute()) {
         $rtn = true;
     }
+    $dbh = false;
+    return $rtn;
+}
+
+/**
+ * 取得今日抓取到的 tweets 總數
+ * 
+ * @return boolean
+ */
+function getTodayTweetAmount()
+{
+    $rtn = false;
+    $dbh = pdo_connect();
+    $sql = 'SELECT SUM(`diffamount`) FROM `tcat_action_log` WHERE DATE(`actiontime`) = CURDATE();';
+    $rec = $dbh->prepare($sql);
+    if ($rec->execute()) {
+        $res = $rec->fetch(PDO::FETCH_NUM);
+        $rtn = $res[0];
+    } else {
+        $dbh = false;
+        return false;
+    }
+
     $dbh = false;
     return $rtn;
 }

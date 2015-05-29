@@ -66,7 +66,7 @@ $search_bins = getSearchBins();
                                     <div class="huge">
                                         <?php echo count($search_bins); ?>
                                     </div>
-                                    <div>In processes!</div>
+                                    <div>In Processes!</div>
                                 </div>
                             </div>
                         </div>
@@ -80,8 +80,8 @@ $search_bins = getSearchBins();
                                     <i class="fa fa-history fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge">32,250</div>
-                                    <div>Update Today!</div>
+                                    <div class="huge"><?php echo number_format(getTodayTweetAmount()); ?></div>
+                                    <div>Capture Today!</div>
                                 </div>
                             </div>
                         </div>
