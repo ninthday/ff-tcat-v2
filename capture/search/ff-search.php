@@ -52,6 +52,9 @@ create_bin($bin_name, $dbh);
 
 $ratefree = 0;
 
+// Count tweets amount before capture
+$amount_before = countCaptureAmount($bin_name);
+
 // Update search execute time
 //ff-tcat
 updateSearchTime($querybin_id);
@@ -60,6 +63,13 @@ search($keywords);
 if ($tweetQueue->length() > 0) {
     $tweetQueue->insertDB();
 }
+
+// Count tweets amount after capture
+$amount_after = countCaptureAmount($bin_name);
+
+$diff_amount = $amount_after - $amount_before;
+// Save Action
+saveActionLog($querybin_id, $diff_amount);
 
 queryManagerCreateBinFromExistingTables($bin_name, $querybin_id, $type, explode("OR", $keywords));
 
