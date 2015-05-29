@@ -21,6 +21,7 @@ $search_bins = getSearchBins();
         <title>FFtcat v2 | Flood Fire Twitter Capturing and Analysis Toolset</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="resources/tagEditor/jquery.tag-editor.css">
         <style>
             body {
                 padding-top: 70px;
@@ -123,7 +124,7 @@ $search_bins = getSearchBins();
                                         <div class="form-group">
                                             <label for="inputPhrase" class="control-label">Phrase to search</label>
                                             <input type="text" class="form-control" id="inputPhrase" placeholder="Phrases">
-                                            <p class="help-block"><i class="fa fa-exclamation-triangle"></i> 以 <kbd>OR</kbd> 區別關鍵字，例如:台灣 OR 中華民國 OR Taiwan OR "Republic of China"</p>
+                                            <p class="help-block"><i class="fa fa-exclamation-triangle"></i> 逐一輸入關鍵字（上限 10 個），包含空白請以半形雙引號 <code>"</code> 框起。例如: "Republic of China"</p>
                                         </div>
                                         <div class="form-group">
                                             <label for="newbin_comments" class="control-label">Comment</label>
@@ -160,14 +161,14 @@ $search_bins = getSearchBins();
                                     echo '<td>' . $i . '.</td>';
                                     echo '<td>sparkline</td>';
                                     echo '<td>' . $bin->name . '</td>';
-                                    echo '<td>' . implode(', ', explode("OR", $bin->phrases)) . '</td>';
+                                    echo '<td>' . implode(', ', explode(" OR", $bin->phrases)) . '</td>';
                                     echo '<td align="center"> ' . number_format($bin->nrOfTweets) . '</td>';
                                     echo '<td>' . $bin->username . '</td>';
                                     echo '<td align="center"> ' . $bin->createtime . '</td>';
                                     echo '<td align="center"> ' . $bin->updatetime . '</td>';
                                     echo '<td> ' . $bin->comment . '</td>';
                                     echo '<td align="right">';
-                                    if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER){
+                                    if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER) {
                                         echo '<button class="btn btn-default"><i class="fa fa-archive"></i></button>';
                                     }
                                     echo '</td>';
@@ -208,6 +209,8 @@ $search_bins = getSearchBins();
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="resources/tagEditor/jquery.caret.min.js"></script>
+    <script src="resources/tagEditor/jquery.tag-editor.min.js"></script>
     <script type="text/javascript">
                                         $(document).ready(function () {
                                             $("button[name='newbin']").click(function () {
@@ -217,6 +220,12 @@ $search_bins = getSearchBins();
 
                                             $("button[name='cancel-new']").click(function () {
                                                 $("#new-content").slideUp('slow');
+                                                removeAllTags();
+                                            });
+
+                                            $("#inputPhrase").tagEditor({
+                                                maxTags: 10,
+                                                placeholder: 'Enter keywords ...'
                                             });
                                         });
                                         function sendNewForm() {
@@ -226,7 +235,8 @@ $search_bins = getSearchBins();
                                                 return false;
                                             if (!validateComments(_comments))
                                                 return false;
-                                            var _phrases = $("#inputPhrase").val();
+                                            var _phrases = formatPhrase($("#inputPhrase").tagEditor('getTags')[0].tags);
+
                                             var _check = window.confirm("You are about to create a new search query bin. Are you sure?");
                                             if (_check == true) {
                                                 var _params = {action: "newbin", type: "search", newbin_phrases: _phrases, newbin_name: _bin, newbin_comments: _comments, active: $("#make_active").val()};
@@ -268,6 +278,17 @@ $search_bins = getSearchBins();
                                             $("#newbin_name").val('');
                                             $("#inputPhrase").val('');
                                             $("textarea[name=newbin_comments]").val('');
+                                            removeAllTags();
+                                        }
+                                        function formatPhrase(tags) {
+                                            return tags.join(" OR ");
+                                        }
+
+                                        function removeAllTags() {
+                                            var tags = $('#inputPhrase').tagEditor('getTags')[0].tags;
+                                            for (i = 0; i < tags.length; i++) {
+                                                $('#inputPhrase').tagEditor('removeTag', tags[i]);
+                                            }
                                         }
 
     </script>
