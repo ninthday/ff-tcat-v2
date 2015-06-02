@@ -259,6 +259,34 @@ function remove_bin($params) {
             $delete_query_bins_users->bindParam(":id", $bin_id, PDO::PARAM_INT);
             $delete_query_bins_users->execute();
         }
+    } elseif ($type == "search") {
+        /**
+         * Delete search queue
+         * @author ninthday <bee.me@ninthday.info>
+         * @since 2015-06-02
+         */
+        // delete phrases
+        $sql = "SELECT phrase_id FROM tcat_query_bins_phrases WHERE querybin_id = :id";
+        $select_query_bins_phrases = $dbh->prepare($sql);
+        $select_query_bins_phrases->bindParam(":id", $bin_id, PDO::PARAM_INT);
+        $select_query_bins_phrases->execute();
+        if ($select_query_bins_phrases->rowCount() > 0) {
+            while ($results = $select_query_bins_phrases->fetch()) {
+                $sql = "DELETE FROM tcat_query_phrases WHERE id = :phrase_id";
+                $delete_query_phrases = $dbh->prepare($sql);
+                $delete_query_phrases->bindParam(":phrase_id", $results['phrase_id'], PDO::PARAM_INT);
+                $delete_query_phrases->execute();
+            }
+            $sql = "DELETE FROM tcat_query_bins_phrases WHERE querybin_id = :id";
+            $delete_query_bins_phrases = $dbh->prepare($sql);
+            $delete_query_bins_phrases->bindParam(":id", $bin_id, PDO::PARAM_INT);
+            $delete_query_bins_phrases->execute();
+        }
+        //delete search queue
+        $sql_del_search = "DELETE FROM `tcat_search_queues` WHERE `querybin_id` = :id";
+        $del_search = $dbh->prepare($sql_del_search);
+        $del_search->bindParam(":id", $bin_id, PDO::PARAM_INT);
+        $del_search->execute();
     }
 
     $sql = "DROP TABLE " . $bin_name . "_tweets";
@@ -289,7 +317,7 @@ function remove_bin($params) {
     $delete_table = $dbh->prepare($sql);
     $delete_table->execute();
 
-    echo '{"msg":"Query bin [' . $bin_name . ']has been deleted"}';
+    echo '{"msg":"Query bin [' . $bin_name . '] has been deleted"}';
 
     $dbh = false;
 }

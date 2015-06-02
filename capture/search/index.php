@@ -74,7 +74,7 @@ $search_bins = getSearchBins();
                     </div>
                 </div>
                 <div class="col-xs-6 col-md-4">
-                    <div class="panel panel-info">
+                    <div class="panel panel-warning">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
@@ -89,7 +89,7 @@ $search_bins = getSearchBins();
                     </div>
                 </div>
                 <div class="col-xs-6 col-md-4">
-                    <div class="panel panel-danger">
+                    <div class="panel panel-info">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
@@ -144,13 +144,13 @@ $search_bins = getSearchBins();
                                     <th width="2%">#</th>
                                     <th width="8%">Status</th>
                                     <th width="8%">Bin Name</th>
-                                    <th width="30%">Phrases</th>
+                                    <th width="25%">Phrases</th>
                                     <th width="7%">Tweets</th>
                                     <th width="5%">Creator</th>
                                     <th width="10%" class="text-center">Create</th>
                                     <th width="10%" class="text-center">Update</th>
                                     <th width="15%">Comment</th>
-                                    <th width="5%"></th>
+                                    <th width="10%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -169,25 +169,14 @@ $search_bins = getSearchBins();
                                     echo '<td> ' . $bin->comment . '</td>';
                                     echo '<td align="right">';
                                     if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER) {
-                                        echo '<button class="btn btn-default"><i class="fa fa-archive"></i></button>';
+                                        echo '<button class="btn btn-danger" name="del-' . $bin->id . '"><i class="fa fa-trash fa-lg"></i></button> ';
+                                        echo '<button class="btn btn-warning name="arch-' . $bin->id . '""><i class="fa fa-archive"></i></button>';
                                     }
                                     echo '</td>';
                                     echo '</tr>';
                                     $i++;
                                 }
                                 ?>
-                                <tr>
-                                    <td>1.</td>
-                                    <td>sparkline</td>
-                                    <td>Bin Name</td>
-                                    <td>Phrases</td>
-                                    <td>Tweet amount</td>
-                                    <td>User name</td>
-                                    <td>Created Times</td>
-                                    <td>Last update</td>
-                                    <td>Description</td>
-                                    <td align="right"><button class="btn btn-default" title="Archive this Bin!"><i class="fa fa-archive"></i></button></td> 
-                                </tr>
                                 <tr>
                                     <td>2.</td>
                                     <td>sparkline</td>
@@ -198,7 +187,10 @@ $search_bins = getSearchBins();
                                     <td>Created Times</td>
                                     <td>Last update</td>
                                     <td>Description</td>
-                                    <td align="right"><button class="btn btn-default"><i class="fa fa-archive"></i></button></td> 
+                                    <td align="right">
+                                        <button class="btn btn-danger" name="del-5"><i class="fa fa-trash fa-lg"></i></button>
+                                        <button class="btn btn-warning" ><i class="fa fa-archive"></i></button>
+                                    </td> 
                                 </tr>
                             </tbody>
                         </table>
@@ -225,7 +217,13 @@ $search_bins = getSearchBins();
 
                                             $("#inputPhrase").tagEditor({
                                                 maxTags: 10,
+                                                forceLowercase: false,
                                                 placeholder: 'Enter keywords ...'
+                                            });
+
+                                            $("button[name^='del-']").click(function () {
+                                                var qid = $(this).attr('name').replace('del-', '');
+                                                sendDelete(qid, 1, 'search');
                                             });
                                         });
                                         function sendNewForm() {
@@ -250,6 +248,32 @@ $search_bins = getSearchBins();
                                                     location.reload();
                                                     $("#new-content").slideUp('slow');
                                                     clearInput();
+                                                });
+                                            }
+                                            return false;
+                                        }
+                                        function sendDelete(_bin, _active, _type) {
+                                            var _check = window.confirm("Are you sure that you want to REMOVE this bin?");
+                                            if (_check == true) {
+                                                if (_active == 1)
+                                                    var _check = window.confirm("The query bin is STILL RUNNING! Are you absolutely sure that you want to completely remove it?");
+                                                if (_check == false)
+                                                    return false;
+
+                                                var _check = window.confirm("Last time: are you really sure that you want to REMOVE the query bin?");
+                                                if (_check == false)
+                                                    return false;
+
+                                                var _params = {action: "removebin", bin: _bin, type: _type, active: _active};
+
+                                                $.ajax({
+                                                    dataType: "json",
+                                                    url: "../query_manager.php",
+                                                    type: 'POST',
+                                                    data: _params
+                                                }).done(function (_data) {
+                                                    alert(_data["msg"]);
+                                                    location.reload();
                                                 });
                                             }
                                             return false;

@@ -71,7 +71,11 @@ $diff_amount = $amount_after - $amount_before;
 // Save Action
 saveActionLog($querybin_id, $diff_amount);
 
-queryManagerCreateBinFromExistingTables($bin_name, $querybin_id, $type, explode("OR", $keywords));
+/**
+ * Already insert phrases in new search bin, not necessary check and create here.
+ * So HERE comment queryManagerCreateBinFromExistingTables function.(ninthday)
+ */
+//queryManagerCreateBinFromExistingTables($bin_name, $querybin_id, $type, explode("OR", $keywords));
 
 function search($keywords, $max_id = null) {
     global $twitter_keys, $current_key, $ratefree, $all_users, $all_tweet_ids, $bin_name, $tweets_success, $tweets_failed, $tweets_processed, $dbh, $tweetQueue;
