@@ -171,3 +171,62 @@ function getTodayTweetAmount()
     $dbh = false;
     return $rtn;
 }
+
+function getSparklineValue($bin_name)
+{
+    $dbh = pdo_connect();
+//    $sql = "SET @i:=0;
+//        SELECT `a`.`datesSeries`, IFNULL(`b`.`cnt`,0) AS `DC` FROM
+//        (SELECT DATE(DATE_SUB(CURDATE(), 
+//        INTERVAL @i:=@i+1 DAY) ) AS `datesSeries`
+//        FROM `" . $bin_name . "_tweets`, (SELECT @i:=0) r
+//        WHERE @i < 10) `a`
+//        LEFT JOIN
+//        (SELECT DATE_FORMAT(`created_at`, '%Y-%m-%d') AS `onlyDay`, COUNT(*) AS `cnt` 
+//        FROM `" . $bin_name . "_tweets` 
+//        WHERE `created_at` > CONCAT(DATE_SUB(CURDATE(), INTERVAL 10 DAY), ' 23:59:59')
+//        GROUP BY `onlyDay`) `b` 
+//        ON `b`.`onlyDay`= `a`.`datesSeries`
+//        ORDER BY `datesSeries`;";
+    $sql = "SELECT DATE_FORMAT(`created_at`, '%Y-%m-%d') AS `onlyDay`, COUNT(*) AS `cnt` 
+        FROM `" . $bin_name . "_tweets` 
+        WHERE `created_at` > CONCAT(DATE_SUB(CURDATE(), INTERVAL 10 DAY), ' 23:59:59')
+        GROUP BY `onlyDay`;";
+    try {
+        $rec = $dbh->prepare($sql);
+        
+        $rec->execute();
+        $rs = $rec->fetchAll();
+        $date_squence = dateRange();
+        ksort($date_squence);
+        foreach ($rs as $day_count) {
+            $date_squence[$day_count['onlyDay']] = (int)$day_count['cnt'];
+        }
+    } catch (PDOException $exc) {
+        echo $exc->getMessage() . '<br>';
+    }
+
+    $dbh = false;
+    return implode(', ', $date_squence);
+}
+
+function dateRange($step = '-1 day', $format = 'Y-m-d')
+{
+
+    $date_squence = array();
+    $today = date($format);
+    $current = strtotime($today);
+//    $last = strtotime($last);
+
+//    while ($current <= $last) {
+//
+//        $dates[] = date($format, $current);
+//        $current = strtotime($step, $current);
+//    }
+    for ($i = 0; $i < 10; $i++) {
+        $date_squence[date($format, $current)] = 0;
+        $current = strtotime($step, $current);
+    }
+
+    return $date_squence;
+}

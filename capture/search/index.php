@@ -29,6 +29,11 @@ $search_bins = getSearchBins();
             .huge {
                 font-size: 40px;
             }
+            .jqstooltip {
+                -webkit-box-sizing: content-box;
+                -moz-box-sizing: content-box;
+                box-sizing: content-box;
+            }
         </style>
     </head>
     <body>
@@ -159,7 +164,7 @@ $search_bins = getSearchBins();
                                 foreach ($search_bins as $bin) {
                                     echo '<tr>';
                                     echo '<td>' . $i . '.</td>';
-                                    echo '<td>sparkline</td>';
+                                    echo '<td><span class="inlinesparkline">' . getSparklineValue($bin->name) . '</span></td>';
                                     echo '<td>' . $bin->name . '</td>';
                                     echo '<td>' . implode(', ', explode(" OR", $bin->phrases)) . '</td>';
                                     echo '<td align="center"> ' . number_format($bin->nrOfTweets) . '</td>';
@@ -179,7 +184,7 @@ $search_bins = getSearchBins();
                                 ?>
                                 <tr>
                                     <td>2.</td>
-                                    <td>sparkline</td>
+                                    <td><span class="inlinesparkline">1,4,4,7,5,9,10</span></td>
                                     <td>Bin Name</td>
                                     <td>Phrases</td>
                                     <td>Tweet amount</td>
@@ -203,6 +208,7 @@ $search_bins = getSearchBins();
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="resources/tagEditor/jquery.caret.min.js"></script>
     <script src="resources/tagEditor/jquery.tag-editor.min.js"></script>
+    <script src="resources/jquerySparkline/jquery.sparkline.min.js"></script>
     <script type="text/javascript">
                                         $(document).ready(function () {
                                             $("button[name='newbin']").click(function () {
@@ -224,6 +230,11 @@ $search_bins = getSearchBins();
                                             $("button[name^='del-']").click(function () {
                                                 var qid = $(this).attr('name').replace('del-', '');
                                                 sendDelete(qid, 1, 'search');
+                                            });
+
+                                            $('.inlinesparkline').sparkline('html', {
+                                                type: 'bar',
+                                                zeroAxis: false
                                             });
                                         });
                                         function sendNewForm() {
