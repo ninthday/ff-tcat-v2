@@ -26,6 +26,8 @@ if (isset($_POST) && isset($_POST['action'])) {
             break;
         case "removebin":
             remove_bin($_POST);
+        case "archivesearchbin":
+            archive_searchbin($_POST);
         default:
             break;
     }
@@ -566,6 +568,74 @@ function modify_bin($params) {
             echo '{"msg": "The queries have been modified but the ' . $type . ' script could NOT be restarted"}';
         }
     }
+    
+    $dbh = false;
+}
+
+/**
+ * 
+ * @global type $now
+ * @param type $params
+ * @author ninthday <bee.me@ninthday.info>
+ * @since 2015-06-04
+ */
+function archive_searchbin($params){
+    global $now;
+
+    $bin_id = trim($params["bin"]);
+    $type = trim($params['type']);
+
+    $dbh = pdo_connect();
+    
+    // get search queue id of the search_query_bin
+    $sql = "SELECT `tcat_search_queues`.*, `tcat_query_bins`.`querybin` 
+        FROM `tcat_search_queues`
+        INNER JOIN `tcat_query_bins` ON `tcat_query_bins`.`id` = `tcat_search_queues`.`querybin_id`
+        WHERE `tcat_search_queues`.`querybin_id` = :bin_id AND `tcat_query_bins`.`type` = :type";
+    $select_searchbin = $dbh->prepare($sql);
+    $select_searchbin->bindParam(':bin_id', $bin_id, PDO::PARAM_INT);
+    $select_searchbin->bindParam(':type', $type, PDO::PARAM_STR);
+    $select_searchbin->execute();
+    if ($select_searchbin->rowCount() == 0) {
+        echo '{"msg":"The query bin with id [' . $bin_id . '] cannot be found."}';
+        return;
+    }
+    
+    if ($select_searchbin->rowCount() > 0) {
+        $results = $select_searchbin->fetch();
+        $queue_id = $results['id'];
+        $phrases = $results['origin_phrase'];
+        $user_name = $results['username'];
+        $create_time = $results['createtime'];
+        $bin_name = $results['querybin'];
+    }
+    
+    $sql = "SELECT COUNT(*) AS `cnt` FROM `" . $bin_name . "_tweets`";
+    $count_tweets = $dbh->prepare($sql);
+    $count_tweets->execute();
+    $results = $count_tweets->fetch();
+    $total_tweets = $results['cnt'];
+    
+    $sql = "INSERT INTO `tcat_search_archives`(`id`, `querybin_id`, `origin_phrase`, `tweetsamount`, `username`, `createtime`, `archivetime`) "
+            . "VALUES (:id, :querybin_id, :origin_phrase, :tweetsamount, :username, :createtime, :archivetime)";
+    $insert_archive = $dbh->prepare($sql);
+    $insert_archive->bindParam(':id', $queue_id, PDO::PARAM_INT);
+    $insert_archive->bindParam(':querybin_id', $bin_id, PDO::PARAM_INT);
+    $insert_archive->bindParam(':origin_phrase', $phrases, PDO::PARAM_STR);
+    $insert_archive->bindParam(':tweetsamount', $total_tweets, PDO::PARAM_INT);
+    $insert_archive->bindParam(':username', $user_name, PDO::PARAM_STR);
+    $insert_archive->bindParam(':createtime', $create_time, PDO::PARAM_STR);
+    $insert_archive->bindParam(':archivetime', $now, PDO::PARAM_STR);
+    if ($insert_archive->execute()){
+        $sql_delete = "DELETE FROM `tcat_search_queues` WHERE `id` = :queue_id";
+        $del_queue = $dbh->prepare($sql_delete);
+        $del_queue->bindParam(':queue_id', $queue_id, PDO::PARAM_INT);
+        if (!$del_queue->execute()){
+            echo '{"msg":"The search bin queue with id [' . $queue_id . '] cannot be delete."}';
+            return;
+        }
+    }
+    
     $dbh = false;
 }
 

@@ -230,3 +230,26 @@ function dateRange($step = '-1 day', $format = 'Y-m-d')
 
     return $date_squence;
 }
+
+/**
+ * 取得目前封存中的總數
+ * 
+ * @return int
+ */
+function getArchiveNum()
+{
+    $rtn = false;
+    $dbh = pdo_connect();
+    $sql = 'SELECT COUNT(*) AS `cnt` FROM `tcat_search_archives`;';
+    $rec = $dbh->prepare($sql);
+    if ($rec->execute()) {
+        $res = $rec->fetch(PDO::FETCH_NUM);
+        $rtn = $res[0];
+    } else {
+        $dbh = false;
+        return false;
+    }
+
+    $dbh = false;
+    return $rtn;
+}

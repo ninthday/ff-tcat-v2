@@ -101,7 +101,7 @@ $search_bins = getSearchBins();
                                     <i class="fa fa-archive fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge">12</div>
+                                    <div class="huge"><?php echo number_format(getArchiveNum()); ?></div>
                                     <div>Archive Search!</div>
                                 </div>
                             </div>
@@ -175,7 +175,7 @@ $search_bins = getSearchBins();
                                     echo '<td align="right">';
                                     if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER) {
                                         echo '<button class="btn btn-danger" name="del-' . $bin->id . '"><i class="fa fa-trash fa-lg"></i></button> ';
-                                        echo '<button class="btn btn-warning name="arch-' . $bin->id . '""><i class="fa fa-archive"></i></button>';
+                                        echo '<button class="btn btn-warning" name="arch-' . $bin->id . '"><i class="fa fa-archive"></i></button>';
                                     }
                                     echo '</td>';
                                     echo '</tr>';
@@ -231,6 +231,12 @@ $search_bins = getSearchBins();
                                                 var qid = $(this).attr('name').replace('del-', '');
                                                 sendDelete(qid, 1, 'search');
                                             });
+                                            
+                                            $("button[name^='arch-']").click(function () {
+                                                var qid = $(this).attr('name').replace('arch-', '');
+                                                console.log(qid);
+                                                sendArchive(qid, 'search');
+                                            });
 
                                             $('.inlinesparkline').sparkline('html', {
                                                 type: 'bar',
@@ -263,6 +269,7 @@ $search_bins = getSearchBins();
                                             }
                                             return false;
                                         }
+
                                         function sendDelete(_bin, _active, _type) {
                                             var _check = window.confirm("Are you sure that you want to REMOVE this bin?");
                                             if (_check == true) {
@@ -276,6 +283,27 @@ $search_bins = getSearchBins();
                                                     return false;
 
                                                 var _params = {action: "removebin", bin: _bin, type: _type, active: _active};
+
+                                                $.ajax({
+                                                    dataType: "json",
+                                                    url: "../query_manager.php",
+                                                    type: 'POST',
+                                                    data: _params
+                                                }).done(function (_data) {
+                                                    alert(_data["msg"]);
+                                                    location.reload();
+                                                });
+                                            }
+                                            return false;
+                                        }
+
+                                        function sendArchive(_bin, _type) {
+                                            var _check = window.confirm("Are you sure that you want to ARCHIVE this bin?");
+                                            if (_check == true) {
+                                                var _check = window.confirm("Last time: are you really sure that you want to ARCHIVE the query bin?");
+                                                if (_check == false)
+                                                    return false;
+                                                var _params = {action: "archivesearchbin", bin: _bin, type: _type};
 
                                                 $.ajax({
                                                     dataType: "json",
