@@ -216,6 +216,7 @@ $search_bins = getSearchBins();
 
                                             $("button[name^='del-']").click(function () {
                                                 var qid = $(this).attr('name').replace('del-', '');
+                                                console.log('delete');
                                                 sendDelete(qid, 1, 'search');
                                             });
 

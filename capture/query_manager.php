@@ -26,8 +26,10 @@ if (isset($_POST) && isset($_POST['action'])) {
             break;
         case "removebin":
             remove_bin($_POST);
+            break;
         case "archivesearchbin":
             archive_searchbin($_POST);
+            break;
         default:
             break;
     }
@@ -579,7 +581,7 @@ function modify_bin($params) {
  * @author ninthday <bee.me@ninthday.info>
  * @since 2015-06-04
  */
-function archive_searchbin($params){
+function archive_searchbin($params) {
     global $now;
 
     $bin_id = trim($params["bin"]);
@@ -597,7 +599,7 @@ function archive_searchbin($params){
     $select_searchbin->bindParam(':type', $type, PDO::PARAM_STR);
     $select_searchbin->execute();
     if ($select_searchbin->rowCount() == 0) {
-        echo '{"msg":"The query bin with id [' . $bin_id . '] cannot be found."}';
+        echo '{"msg":"archive: The query bin with id [' . $bin_id . '] cannot be found."}';
         return;
     }
     
@@ -633,6 +635,8 @@ function archive_searchbin($params){
         if (!$del_queue->execute()){
             echo '{"msg":"The search bin queue with id [' . $queue_id . '] cannot be delete."}';
             return;
+        } else {
+            echo '{"msg":"The search bin queue has archived."}';
         }
     }
     
