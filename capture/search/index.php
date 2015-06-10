@@ -52,9 +52,9 @@ $search_bins = getSearchBins();
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                         <li class="active"><a href="#">Search</a></li>
-                        <li><a href="#about">Archive</a></li>
-                        <li><a href="#contact">Analysis</a></li>
-
+                        <li><a href="archived.php">Archive</a></li>
+                        <li><a href="http://140.119.163.61/~ff-tcat/v2/analysis/" target="_blank">Analysis</a></li>
+                        <li><a href="#">niceToolBar@v2</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -83,11 +83,11 @@ $search_bins = getSearchBins();
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <i class="fa fa-history fa-5x"></i>
+                                    <i class="fa fa-archive fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge"><?php echo number_format(getTodayTweetAmount()); ?></div>
-                                    <div>Capture Today!</div>
+                                    <div class="huge"><?php echo number_format(getArchiveNum()); ?></div>
+                                    <div>Archive Search!</div>
                                 </div>
                             </div>
                         </div>
@@ -98,11 +98,11 @@ $search_bins = getSearchBins();
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <i class="fa fa-archive fa-5x"></i>
+                                    <i class="fa fa-history fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge"><?php echo number_format(getArchiveNum()); ?></div>
-                                    <div>Archive Search!</div>
+                                    <div class="huge"><?php echo number_format(getTodayTweetAmount()); ?></div>
+                                    <div>Capture Today!</div>
                                 </div>
                             </div>
                         </div>
@@ -143,62 +143,49 @@ $search_bins = getSearchBins();
                                 </div>
                             </div>
                         </div>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th width="2%">#</th>
-                                    <th width="8%">Status</th>
-                                    <th width="8%">Bin Name</th>
-                                    <th width="25%">Phrases</th>
-                                    <th width="7%">Tweets</th>
-                                    <th width="5%">Creator</th>
-                                    <th width="10%" class="text-center">Create</th>
-                                    <th width="10%" class="text-center">Update</th>
-                                    <th width="15%">Comment</th>
-                                    <th width="10%"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $i = 1;
-                                foreach ($search_bins as $bin) {
-                                    echo '<tr>';
-                                    echo '<td>' . $i . '.</td>';
-                                    echo '<td><span class="inlinesparkline">' . getSparklineValue($bin->name) . '</span></td>';
-                                    echo '<td>' . $bin->name . '</td>';
-                                    echo '<td>' . implode(', ', explode(" OR", $bin->phrases)) . '</td>';
-                                    echo '<td align="center"> ' . number_format($bin->nrOfTweets) . '</td>';
-                                    echo '<td>' . $bin->username . '</td>';
-                                    echo '<td align="center"> ' . $bin->createtime . '</td>';
-                                    echo '<td align="center"> ' . $bin->updatetime . '</td>';
-                                    echo '<td> ' . $bin->comment . '</td>';
-                                    echo '<td align="right">';
-                                    if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER) {
-                                        echo '<button class="btn btn-danger" name="del-' . $bin->id . '"><i class="fa fa-trash fa-lg"></i></button> ';
-                                        echo '<button class="btn btn-warning" name="arch-' . $bin->id . '"><i class="fa fa-archive"></i></button>';
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="2%">#</th>
+                                        <th width="8%">Status</th>
+                                        <th width="8%">Bin Name</th>
+                                        <th width="25%">Phrases</th>
+                                        <th width="7%">Tweets</th>
+                                        <th width="5%">Creator</th>
+                                        <th width="10%" class="text-center">Create</th>
+                                        <th width="10%" class="text-center">Update</th>
+                                        <th width="15%">Comment</th>
+                                        <th width="10%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $i = 1;
+                                    foreach ($search_bins as $bin) {
+                                        echo '<tr>';
+                                        echo '<td>' . $i . '.</td>';
+                                        echo '<td><span class="inlinesparkline">' . getSparklineValue($bin->name) . '</span></td>';
+                                        echo '<td>' . $bin->name . '</td>';
+                                        echo '<td>' . implode(', ', explode(" OR", $bin->phrases)) . '</td>';
+                                        echo '<td align="center"> ' . number_format($bin->nrOfTweets) . '</td>';
+                                        echo '<td>' . $bin->username . '</td>';
+                                        echo '<td align="center"> ' . $bin->createtime . '</td>';
+                                        echo '<td align="center"> ' . $bin->updatetime . '</td>';
+                                        echo '<td> ' . $bin->comment . '</td>';
+                                        echo '<td align="right">';
+                                        if ($username == $bin->username || $_SERVER['PHP_AUTH_USER'] == ADMIN_USER) {
+                                            echo '<button class="btn btn-danger" name="del-' . $bin->id . '"><i class="fa fa-trash fa-lg"></i></button> ';
+                                            echo '<button class="btn btn-warning" name="arch-' . $bin->id . '"><i class="fa fa-archive"></i></button>';
+                                        }
+                                        echo '</td>';
+                                        echo '</tr>';
+                                        $i++;
                                     }
-                                    echo '</td>';
-                                    echo '</tr>';
-                                    $i++;
-                                }
-                                ?>
-                                <tr>
-                                    <td>2.</td>
-                                    <td><span class="inlinesparkline">1,4,4,7,5,9,10</span></td>
-                                    <td>Bin Name</td>
-                                    <td>Phrases</td>
-                                    <td>Tweet amount</td>
-                                    <td>User name</td>
-                                    <td>Created Times</td>
-                                    <td>Last update</td>
-                                    <td>Description</td>
-                                    <td align="right">
-                                        <button class="btn btn-danger" name="del-5"><i class="fa fa-trash fa-lg"></i></button>
-                                        <button class="btn btn-warning" ><i class="fa fa-archive"></i></button>
-                                    </td> 
-                                </tr>
-                            </tbody>
-                        </table>
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -231,7 +218,7 @@ $search_bins = getSearchBins();
                                                 var qid = $(this).attr('name').replace('del-', '');
                                                 sendDelete(qid, 1, 'search');
                                             });
-                                            
+
                                             $("button[name^='arch-']").click(function () {
                                                 var qid = $(this).attr('name').replace('arch-', '');
                                                 console.log(qid);

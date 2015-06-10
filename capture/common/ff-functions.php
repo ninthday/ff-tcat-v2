@@ -253,3 +253,62 @@ function getArchiveNum()
     $dbh = false;
     return $rtn;
 }
+
+/**
+ * 取得 Archive Search Bins 的資料列表
+ *
+ * @return array Search Bin Content
+ * @author ninthday <bee.me@ninthday.info>
+ * @since 2014-09-27
+ */
+function getArchiveSearchBins()
+{
+    $dbh = pdo_connect();
+    $sql = 'SELECT `tcat_query_bins`.`id`, `tcat_query_bins`.`querybin`, `comments`, `origin_phrase`, `tweetsamount`, `username`, `createtime`, `archivetime`
+            FROM `tcat_query_bins`
+            INNER JOIN `tcat_search_archives` ON `tcat_search_archives`.`querybin_id` = `tcat_query_bins`.`id`';
+    $rec = $dbh->prepare($sql);
+    $rec->execute();
+    $rs_sbin = $rec->fetchAll();
+    $querybins = array();
+    foreach ($rs_sbin as $data) {
+        if (!isset($querybins[$data['id']])) {
+            $bin = new stdClass();
+            $bin->id = $data['id'];
+            $bin->name = $data['querybin'];
+            $bin->phrases = $data['origin_phrase'];
+            $bin->nrOfTweets = $data['tweetsamount'];
+            $bin->username = $data['username'];
+            $bin->createtime = $data['createtime'];
+            $bin->archivetime = $data['archivetime'];
+            $bin->comment = $data['comments'];
+        }
+        $querybins[$data['id']] = $bin;
+    }
+
+    $dbh = false;
+    return $querybins;
+}
+
+/**
+ * 取得目前運行中的 Search Bin 總數
+ * 
+ * @return int
+ */
+function getSearchNum()
+{
+    $rtn = false;
+    $dbh = pdo_connect();
+    $sql = 'SELECT COUNT(*) AS `cnt` FROM `tcat_search_queues`;';
+    $rec = $dbh->prepare($sql);
+    if ($rec->execute()) {
+        $res = $rec->fetch(PDO::FETCH_NUM);
+        $rtn = $res[0];
+    } else {
+        $dbh = false;
+        return false;
+    }
+
+    $dbh = false;
+    return $rtn;
+}
